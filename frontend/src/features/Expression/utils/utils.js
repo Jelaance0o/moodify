@@ -5,10 +5,9 @@ import {
 
 
 export const init = async ({landmarkerRef , videoRef , streamRef , }) => {
-  const vision = await FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm",
-  );
-
+const vision = await FilesetResolver.forVisionTasks(
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm",
+);
   landmarkerRef.current = await FaceLandmarker.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath:

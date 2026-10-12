@@ -36,13 +36,14 @@ export default function FaceExpression() {
         <div style={{ textAlign: "center" }}>
             <video
                 ref={videoRef}
-                style={{ width: "400px", borderRadius: "12px" }}
+                style={{ width: "400px", borderRadius: "12px", paddingTop:"10rem"}}
                 playsInline
             />
 
             <h2>{expression}</h2>
 
             <button
+                style={{ borderRadius: "12px", paddingInline:"1rem",paddingBlock:"1rem", fontSize:"1rem" }}
                 onClick={() =>
                     detect({
                         landmarkerRef,
