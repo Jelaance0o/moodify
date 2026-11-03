@@ -1,33 +1,31 @@
 import FormGroup from "../components/FormGroup";
-import { Button } from "../components/Button";
 import { Link, useNavigate } from "react-router";
 import "../styles/login.scss";
 import { useAuth } from "../hook/useAuth";
 import { useState } from "react";
 
- const Login = () => {
-  const { handleLogin, loading } = useAuth;
+const Login = () => {
+  const { handleLogin, loading } = useAuth();
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-   const handleSubmit = async (e) => {
-     e.preventDefault();
-     await handleLogin({ email, password });
-     navigate("/")
-   };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await handleLogin({ email, password });
+    navigate("/");
+  };
 
   return (
     <div>
       <div className="login-page">
         <div className="form-container">
           <h1>Login</h1>
-          <form>
+          <form onSubmit={handleSubmit}>
             <FormGroup
-              value={password}
+              value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
               }}
@@ -44,7 +42,7 @@ import { useState } from "react";
               label="Password :"
             />
 
-            <Button title="Login"></Button>
+            <button className="button">Login</button>
           </form>
           <p>
             Don't have a account ? <Link to="/Register">Register User</Link>
