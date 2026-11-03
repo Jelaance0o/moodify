@@ -25,6 +25,7 @@ const Login = () => {
           <h1>Login</h1>
           <form onSubmit={handleSubmit}>
             <FormGroup
+              type="email"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -34,6 +35,7 @@ const Login = () => {
             />
 
             <FormGroup
+              type="password"
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);

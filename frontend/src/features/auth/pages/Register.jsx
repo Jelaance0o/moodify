@@ -6,21 +6,24 @@ import "../../shared/styles/global.scss";
 import { useAuth } from "../hook/useAuth";
 
 const Register = () => {
-  
   const {handleRegister , loading}= useAuth()
   const navigate = useNavigate()
 
   const [email, setEmail] = useState("")
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
 
 async function handleSubmit(e) {
   e.preventDefault()
+  setErrorMessage("")
     try {
       await handleRegister({ username, email, password });
       navigate("/");
     } catch (error) {
-      console.error("Registration failed:", error);
+      setErrorMessage(
+        error.response?.data?.message || "Unable to register. Please try again."
+      );
     }
   
 }
@@ -39,17 +42,22 @@ async function handleSubmit(e) {
           label="Username :" />
 
           <FormGroup 
+          type="email"
           value={email}
           onChange={(e)=>setEmail(e.target.value)}
           placeholder="Email" 
           label="Email :" />
 
           <FormGroup 
+          type="password"
           value={password}
           placeholder="Enter Your Password" 
           onChange={(e)=>setPassword(e.target.value)}
           label="Password :" />
-          <button className="button">Register</button>
+          {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
+          <button className="button" type="submit" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
+          </button>
         </form>
         <p>Already have an account ? <Link to="/login" >Login User</Link> </p>
       </div>
