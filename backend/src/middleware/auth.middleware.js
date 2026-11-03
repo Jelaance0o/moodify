@@ -1,6 +1,4 @@
-const userModel = require("../models/user.model")
 const jwt = require("jsonwebtoken")
-const blacklistModel = require("../models/blacklist.model")
 const redis = require("../config/cache")
 
 
@@ -38,5 +36,4 @@ async function authUser(req, res, next) {
 
 module.exports = authUser
 
-// redis - cli - u redis://default:b3GDxIMdl0320psLj5skM4HX9jFdZpj7@cattle-friends-receptive-27398.db.redis.io:14550
 

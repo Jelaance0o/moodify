@@ -1,7 +1,6 @@
 const userModel = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const blacklistModel = require("../models/blacklist.model")
 const redis = require("../config/cache")
 
 async function registerUser(req, res) {
@@ -33,7 +32,7 @@ async function registerUser(req, res) {
     res.cookie("token", token)
 
     return res.status(201).json({
-        message: "user",
+        message: "user register successful",
         user: {
             id: user._id,
             username: user.username,
