@@ -1,8 +1,10 @@
 import FormGroup from "../components/FormGroup";
 import { Link, useNavigate } from "react-router";
 import "../styles/login.scss";
-import { useAuth } from "../hook/useAuth";
 import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
+import { login } from "../services/auth.api";
+
 
 const Login = () => {
   const { handleLogin, loading } = useAuth();
@@ -12,34 +14,35 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await handleLogin({ email, password });
-    navigate("/");
-  };
+   const submitHandler = async (e) => {
+     e.preventDefault();
+
+     await login(email, password);
+   }; 
+
+
 
   return (
     <div>
       <div className="login-page">
         <div className="form-container">
           <h1>Login</h1>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={submitHandler}>
+
             <FormGroup
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              placeholder="Email"
-              label="Email :"
+            onChange={(e)=>{
+              setEmail(e.target.value)
+            }}
+            value={email}
+            placeholder="Email"
+            label="Email :"
             />
 
             <FormGroup
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
+            onChange={(e)=>{
+              setPassword(e.target.value)
+            }}
+            value={password}
               placeholder="Password"
               label="Password :"
             />
