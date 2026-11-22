@@ -1,4 +1,4 @@
-@import"./button.scss";
+@use"./button.scss";
 * {
   margin: 0;
   padding: 0;
@@ -17,5 +17,12 @@ body,
   a{
     text-decoration: none;
     color: rgb(136, 136, 248);
+  }
+
+  .loading{
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
