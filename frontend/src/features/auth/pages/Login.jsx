@@ -24,7 +24,7 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
@@ -33,7 +33,7 @@ const Login = () => {
    const submitHandler = async (e) => {
      e.preventDefault();
 
-     await handleLogin({email, password});
+     await handleLogin({ email: identifier, username: identifier, password });
      navigate("/")
    }; 
 
@@ -179,17 +179,17 @@ const Login = () => {
 
           <form onSubmit={submitHandler}>
             <div className="form-group">
-              <label htmlFor="login-email">Email</label>
+              <label htmlFor="login-identifier">Username or email</label>
 
               <div className="input-wrapper">
                 <UserRound size={20} />
 
                 <input
-                  id="login-email"
+                  id="login-identifier"
                   type="text"
-                  placeholder="Enter your email "
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your username or email"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   autoComplete="username"
                   required
                 />
