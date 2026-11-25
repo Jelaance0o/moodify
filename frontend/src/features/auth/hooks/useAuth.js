@@ -9,34 +9,33 @@ export const useAuth = ()=>{
     const {loading, setLoading , user , setUser} = context
 
     async function handleRegister({email, username , password}){
-        setLoading(true)
         const data = await register({email, username , password})
         setUser(data.user)
-        setLoading(false)
+        return true
     }
     async function handleLogin({email, username , password}){
-        setLoading(true)
         const data = await login({email, username , password})
         setUser(data.user)
-        setLoading(false)
     }
-    async function handleGetme(){
+    useEffect(() => {
         setLoading(true)
-        const data = await getMe()
-        setUser(data.user)
-        setLoading(false)
-    }
+        getMe().then(
+            (data) => setUser(data.user),
+            (error) => {
+                if (error.response?.status === 401) {
+                    setUser(null)
+                } else {
+                    console.error("Unable to load the current user", error)
+                }
+            },
+        ).finally(() => setLoading(false))
+    }, [setLoading, setUser])
+
     async function handleLogout(){
-        setLoading(true)
         const data = await logout()
         setUser(data.user)
-        setLoading(false)
     }
 
-    useEffect(() => {
-      handleGetme()
-    }, [])
-    
 
-    return {handleLogin , handleLogout , handleGetme, handleRegister , loading, user}
+    return {handleLogin , handleLogout, handleRegister, loading, user}
 }

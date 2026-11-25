@@ -19,12 +19,13 @@ import {
 
 
 const Register = () => {
-  const { handleRegister, loading } = useAuth();
+  const { handleRegister } = useAuth();
 const [email, setEmail] = useState("");
 const [username, setUsername] = useState("");
 const [password, setPassword] = useState("");
 const [showPassword, setShowPassword] = useState(false);
 const [error, setError] = useState("");
+const [isRegistering, setIsRegistering] = useState(false);
 
   const navigate = useNavigate();
 
@@ -32,6 +33,7 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   setError("");
+  setIsRegistering(true);
 
   try {
     const result = await handleRegister({
@@ -50,6 +52,8 @@ const handleSubmit = async (e) => {
         err.message ||
         "Registration failed. Please try again.",
     );
+  } finally {
+    setIsRegistering(false);
   }
 };
 
@@ -250,10 +254,10 @@ const handleSubmit = async (e) => {
             <button
               className="register-button"
               type="submit"
-              disabled={loading}
+              disabled={isRegistering}
             >
-              <span>{loading ? "Registering..." : "Create Account"}</span>
-              {!loading && <ArrowRight size={20} />}
+              <span>{isRegistering ? "Registering..." : "Create Account"}</span>
+              {!isRegistering && <ArrowRight size={20} />}
             </button>
           </form>
 

@@ -1,21 +1,34 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const { type } = require("../config/cache");
 
 const songSchema = mongoose.Schema({
     title:{
         type:String,
-        require:true
+        required:true
+    },
+    artist:{
+        type:String,
+    },
+    year:{
+        type:String
+    },
+    lyrics:{
+        type:String
     },
     url:{
         type:String,
-        require:true
+        required:true
     },
     posterURL:{
         type:String,
-        require:true
+        required:true
     },
     mood:{
         type:String,
-        enum:["sad","happiness", "surprice"]
+        enum:{
+            values:["sad", "happy" , "anger"],
+            message: "Enum this is"
+        }
     }
 })
 
