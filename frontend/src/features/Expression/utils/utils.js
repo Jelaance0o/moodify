@@ -1,13 +1,17 @@
-import {
-    FaceLandmarker,
-    FilesetResolver
-} from "@mediapipe/tasks-vision";
+import { FaceLandmarker, FilesetResolver, HandLandmarker } from "@mediapipe/tasks-vision";
 
+export async function init({ landmarkerRef, handLandmarkerRef, videoRef, streamRef }) {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    throw new Error("Camera access is not available in this browser.");
+  }
 
-export const init = async ({landmarkerRef , videoRef , streamRef , }) => {
-const vision = await FilesetResolver.forVisionTasks(
-  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm",
-);
+  streamRef.current = await navigator.mediaDevices.getUserMedia({ video: true });
+  videoRef.current.srcObject = streamRef.current;
+  await videoRef.current.play();
+
+  const vision = await FilesetResolver.forVisionTasks(
+    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm"
+  );
   landmarkerRef.current = await FaceLandmarker.createFromOptions(vision, {
     baseOptions: {
       modelAssetPath:
@@ -17,62 +21,72 @@ const vision = await FilesetResolver.forVisionTasks(
     runningMode: "VIDEO",
     numFaces: 1,
   });
+  handLandmarkerRef.current = await HandLandmarker.createFromOptions(vision, {
+    baseOptions: {
+      modelAssetPath:
+        "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+    },
+    runningMode: "VIDEO",
+    numHands: 2,
+  });
+}
 
-  streamRef.current = await navigator.mediaDevices.getUserMedia({ video: true });
+function isOpenPalm(landmarks) {
+  const wrist = landmarks[0];
+  const extendedFingers = [
+    [8, 6],
+    [12, 10],
+    [16, 14],
+    [20, 18],
+  ].filter(([tip, joint]) => {
+    const tipDistance = Math.hypot(landmarks[tip].x - wrist.x, landmarks[tip].y - wrist.y);
+    const jointDistance = Math.hypot(landmarks[joint].x - wrist.x, landmarks[joint].y - wrist.y);
+    return tipDistance > jointDistance + 0.02;
+  }).length;
+  const thumbTipDistance = Math.hypot(landmarks[4].x - landmarks[5].x, landmarks[4].y - landmarks[5].y);
+  const thumbJointDistance = Math.hypot(landmarks[3].x - landmarks[5].x, landmarks[3].y - landmarks[5].y);
 
-  videoRef.current.srcObject = streamRef.current;
+  return extendedFingers >= 4 && thumbTipDistance > thumbJointDistance + 0.02;
+}
 
-  await videoRef.current.play();
-
-};
-
-export const detect = ({landmarkerRef , videoRef , setExpression}) => {
-  if (!landmarkerRef.current || !videoRef.current) return;
-
-  const results = landmarkerRef.current.detectForVideo(
-    videoRef.current,
-    performance.now(),
-  );
-
-  if (results.faceBlendshapes?.length > 0) {
-    const blendshapes = results.faceBlendshapes[0].categories;
-
-    const getScore = (name) =>
-      blendshapes.find((b) => b.categoryName === name)?.score || 0;
-
-    // Mouth
-    const smileLeft = getScore("mouthSmileLeft");
-    const smileRight = getScore("mouthSmileRight");
-
-    const frownLeft = getScore("mouthFrownLeft");
-    const frownRight = getScore("mouthFrownRight");
-
-    const jawOpen = getScore("jawOpen");
-
-    // Eyebrows
-    const browUp = getScore("browInnerUp");
-    const browDownLeft = getScore("browDownLeft");
-    const browDownRight = getScore("browDownRight");
-
-    let currentExpression = "Neutral";
-
-    // Happy 😄
-    if (smileLeft > 0.5 && smileRight > 0.5) {
-      currentExpression = "Happy 😄";
-    }
-
-    // Sad 😢
-    else if (frownLeft > 0.001 && frownRight > 0.001) {
-      currentExpression = "Sad 😢";
-    }
-
-    // Angry 😠
-    else if (browDownLeft > 0.5 && browDownRight > 0.5) {
-      currentExpression = "Angry 😠";
-    }
-
-    setExpression(currentExpression);
+export function detect({ landmarkerRef, handLandmarkerRef, videoRef }) {
+  if (!landmarkerRef.current || !videoRef.current) {
+    return { expression: "Camera is off", mood: null, confidence: 0 };
   }
 
-  animationRef.current = requestAnimationFrame(detect);
-};
+  const timestamp = performance.now();
+  const results = landmarkerRef.current.detectForVideo(videoRef.current, timestamp);
+  const blendshapes = results.faceBlendshapes?.[0]?.categories;
+  if (!blendshapes) {
+    return { expression: "No face detected", mood: null, confidence: 0 };
+  }
+
+  const hands = handLandmarkerRef.current?.detectForVideo(videoRef.current, timestamp);
+  const openPalms = hands?.landmarks?.filter(isOpenPalm).length || 0;
+  const score = (name) => blendshapes.find((item) => item.categoryName === name)?.score || 0;
+  const smile = (score("mouthSmileLeft") + score("mouthSmileRight")) / 2;
+  const frown = (score("mouthFrownLeft") + score("mouthFrownRight")) / 2;
+  const browDown = (score("browDownLeft") + score("browDownRight")) / 2;
+  const browInnerUp = score("browInnerUp");
+  const eyesDown = (score("eyeLookDownLeft") + score("eyeLookDownRight")) / 2;
+
+  if (smile > 0.5 && openPalms >= 2) {
+    return { expression: "Bliss", mood: "bliss", confidence: smile };
+  }
+  if (smile > 0.5) {
+    return { expression: "Happy", mood: "happy", confidence: smile };
+  }
+  if (browDown > 0.5) {
+    return { expression: "Angry", mood: "anger", confidence: browDown };
+  }
+  if (
+    frown > 0.28 ||
+    (frown > 0.12 && browInnerUp > 0.18) ||
+    (browInnerUp > 0.4 && eyesDown > 0.2)
+  ) {
+    const confidence = Math.max(frown, browInnerUp * 0.7 + eyesDown * 0.3);
+    return { expression: "Sad", mood: "sad", confidence };
+  }
+
+  return { expression: "Neutral", mood: null, confidence: 0 };
+}

@@ -1,28 +1,15 @@
-import React from 'react'
-import { useAuth } from '../hooks/useAuth'
-import { useNavigate , Navigate } from 'react-router'
-import { useEffect } from 'react'
+import { Navigate } from "react-router";
+import { useAuth } from "../hooks/useAuth";
 import UseAnimations from "react-useanimations";
 import infinity from "react-useanimations/lib/infinity";
 
+export default function Protected({ children }) {
+  const { user, loading } = useAuth();
 
-const Protected = ({children}) => {
+  if (loading) {
+    return <UseAnimations className="loading" animation={infinity} size={80} />;
+  }
 
-    const {user , loading} = useAuth()
-    const navigate = useNavigate()
-
-    
-           if (loading) {
-             return (
-               <UseAnimations className="loading" animation={infinity} size={80}/>
-             );
-           }
-
-    if(!user){
-      return <Navigate to={"/login"}/>
-    }
-
-  return children
+  if (!user) return <Navigate to="/login" />;
+  return children;
 }
-
-export default Protected

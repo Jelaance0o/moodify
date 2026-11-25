@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import FormGroup from "../components/FormGroup";
+import { useState } from "react";
 import "../styles/register.scss";
 import { Link, useNavigate } from "react-router";
 import "../../shared/styles/global.scss";
@@ -29,32 +28,24 @@ const [isRegistering, setIsRegistering] = useState(false);
 
   const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
+const handleSubmit = (e) => {
   e.preventDefault();
 
   setError("");
   setIsRegistering(true);
 
-  try {
-    const result = await handleRegister({
+  handleRegister({
       email: email.trim(),
       username: username.trim(),
       password,
-    });
-
-    // Navigate only when registration succeeds
-    if (result === true) {
-      navigate("/");
-    }
-  } catch (err) {
-    setError(
-      err.response?.data?.message ||
-        err.message ||
-        "Registration failed. Please try again.",
-    );
-  } finally {
-    setIsRegistering(false);
-  }
+    }).then(
+      () => navigate("/"),
+      (error) => setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Registration failed. Please try again."
+      )
+    ).finally(() => setIsRegistering(false));
 };
 
 

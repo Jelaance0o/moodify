@@ -1,4 +1,3 @@
-import FormGroup from "../components/FormGroup";
 import { Link, useNavigate } from "react-router";
 import "../styles/login.scss";
 import { useState } from "react";
@@ -13,14 +12,13 @@ import {
   Music2,
   Heart,
   Play,
-  Pause,
   Smile,
   Moon,
   Zap,
 } from "lucide-react";
 
 const Login = () => {
-  const { handleLogin, loading } = useAuth();
+  const { handleLogin } = useAuth();
 
   const navigate = useNavigate();
 
