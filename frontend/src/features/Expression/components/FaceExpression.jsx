@@ -32,29 +32,37 @@ export default function FaceExpression({ onMoodDetected, onScanningChange, scanR
     scanningHandlerRef.current = onScanningChange;
   }, [onMoodDetected, onScanningChange]);
 
-  const cleanupScan = useCallback(() => {
+  const stopCamera = useCallback(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
     animationRef.current = null;
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+  }, []);
+
+  const closeDetectors = useCallback(() => {
     landmarkerRef.current?.close();
     landmarkerRef.current = null;
     handLandmarkerRef.current?.close();
     handLandmarkerRef.current = null;
-    if (videoRef.current) videoRef.current.srcObject = null;
   }, []);
+
+  const cleanupScan = useCallback(() => {
+    stopCamera();
+    closeDetectors();
+  }, [closeDetectors, stopCamera]);
 
   const finishScan = useCallback((message, mood = null) => {
     scanId.current += 1;
-    cleanupScan();
+    stopCamera();
     scanningRef.current = false;
     setIsScanning(false);
     scanningHandlerRef.current?.(false);
     setExpression(message);
     setDetectedExpression(mood);
-  }, [cleanupScan]);
+  }, [stopCamera]);
 
   const startScan = useCallback(() => {
     if (scanningRef.current || isStarting.current) return;
@@ -64,31 +72,89 @@ export default function FaceExpression({ onMoodDetected, onScanningChange, scanR
     const currentScan = ++scanId.current;
     setError("");
     setDetectedExpression(null);
-    setExpression("Starting camera and loading mood detection...");
+    setExpression("Loading camera and mood detector");
     setIsScanning(true);
     scanningHandlerRef.current?.(true);
-    init({ landmarkerRef, handLandmarkerRef, videoRef, streamRef }).then(
+    const initializationTimeout = setTimeout(() => {
+      if (currentScan !== scanId.current) return;
+      isStarting.current = false;
+      setError("Mood detector is taking too long to load. Check your connection and try again.");
+      finishScan("Mood detector could not load.");
+      closeDetectors();
+    }, 20000);
+    timeoutRef.current = initializationTimeout;
+    init({
+      landmarkerRef,
+      handLandmarkerRef,
+      videoRef,
+      streamRef,
+      isCancelled: () => currentScan !== scanId.current,
+    }).then(
       () => {
-        isStarting.current = false;
+        if (timeoutRef.current === initializationTimeout) {
+          clearTimeout(initializationTimeout);
+          timeoutRef.current = null;
+        }
         if (currentScan !== scanId.current) {
-          cleanupScan();
           return;
         }
+        isStarting.current = false;
 
-        setExpression("Looking for your mood...");
+        setExpression("Looking for your mood");
         const deadline = Date.now() + 8000;
+        const moodHoldDurations = { bliss: 250, happy: 650, sad: 180, anger: 180 };
+        const moodLabels = { bliss: "Bliss", happy: "Happy", sad: "Sad", anger: "Angry" };
+        const moodGapTolerance = 250;
+        let candidateMood = null;
+        let candidateStartedAt = 0;
+        let candidateLastSeenAt = 0;
+        let candidateConfidence = 0;
+        const completeMood = (expression, mood, confidence) => {
+          moodHandlerRef.current?.(mood, confidence);
+          finishScan(`${expression} detected`, mood);
+        };
         const scan = () => {
           if (currentScan !== scanId.current) return;
-          const result = detect({ landmarkerRef, handLandmarkerRef, videoRef });
-
-          if (result.mood) {
-            moodHandlerRef.current?.(result.mood, result.confidence);
-            finishScan(`${result.expression} detected`, result.mood);
+          let result;
+          try {
+            result = detect({ landmarkerRef, handLandmarkerRef, videoRef });
+          } catch (reason) {
+            setError(reason.message || "Mood detection stopped unexpectedly. Try again.");
+            finishScan("Mood detection failed.");
+            closeDetectors();
             return;
           }
 
-          if (Date.now() >= deadline) {
-            finishScan("No mood detected. Try again.");
+          const now = Date.now();
+          if (result.mood) {
+            if (candidateMood !== result.mood || now - candidateLastSeenAt > moodGapTolerance) {
+              candidateMood = result.mood;
+              candidateStartedAt = now;
+              candidateConfidence = result.confidence;
+              setExpression("Hold your expression steady");
+            } else {
+              candidateConfidence = Math.max(candidateConfidence, result.confidence);
+            }
+            candidateLastSeenAt = now;
+
+            if (now - candidateStartedAt >= moodHoldDurations[result.mood]) {
+              completeMood(result.expression, result.mood, candidateConfidence);
+              return;
+            }
+          } else if (candidateMood && now - candidateLastSeenAt > moodGapTolerance) {
+            candidateMood = null;
+          }
+
+          if (now >= deadline) {
+            if (
+              candidateMood &&
+              now - candidateStartedAt >= moodHoldDurations[candidateMood] &&
+              now - candidateLastSeenAt <= moodGapTolerance
+            ) {
+              completeMood(moodLabels[candidateMood], candidateMood, candidateConfidence);
+            } else {
+              finishScan("No mood detected. Try again.");
+            }
             return;
           }
 
@@ -96,16 +162,29 @@ export default function FaceExpression({ onMoodDetected, onScanningChange, scanR
         };
 
         timeoutRef.current = setTimeout(() => {
-          if (currentScan === scanId.current) finishScan("No mood detected. Try again.");
+          if (currentScan !== scanId.current) return;
+          const now = Date.now();
+          if (
+            candidateMood &&
+            now - candidateStartedAt >= moodHoldDurations[candidateMood] &&
+            now - candidateLastSeenAt <= moodGapTolerance
+          ) {
+            completeMood(moodLabels[candidateMood], candidateMood, candidateConfidence);
+          } else {
+            finishScan("No mood detected. Try again.");
+          }
         }, 8100);
         scan();
       },
       (reason) => {
-        isStarting.current = false;
+        if (timeoutRef.current === initializationTimeout) {
+          clearTimeout(initializationTimeout);
+          timeoutRef.current = null;
+        }
         if (currentScan !== scanId.current) {
-          cleanupScan();
           return;
         }
+        isStarting.current = false;
         cleanupScan();
         scanningRef.current = false;
         setIsScanning(false);
@@ -114,7 +193,7 @@ export default function FaceExpression({ onMoodDetected, onScanningChange, scanR
         setError(reason.message || "Unable to start the face scanner.");
       }
     );
-  }, [cleanupScan, finishScan]);
+  }, [cleanupScan, closeDetectors, finishScan]);
 
   useEffect(() => {
     if (scanRequest === requestRef.current) return;
@@ -147,14 +226,14 @@ export default function FaceExpression({ onMoodDetected, onScanningChange, scanR
         <>
           <video ref={videoRef} playsInline muted />
           <p aria-live="polite">{error || expression}</p>
-          <span className="face-scanner__indicator">Scanning...</span>
+          <span className="face-scanner__indicator">Scanning mood</span>
         </>
       ) : (
         <div className="face-scanner__welcome" aria-live="polite">
           <div className="face-scanner__mood-art" aria-hidden="true">
             <span>😊</span><span>😢</span><span>😠</span><span>🥰</span>
           </div>
-          <strong>{error ? "Camera unavailable" : "Ready when you are"}</strong>
+          <strong>{error ? "Mood scanner unavailable" : "Ready when you are"}</strong>
           <span>{error || "Start a scan and let your mood choose the music."}</span>
         </div>
       )}

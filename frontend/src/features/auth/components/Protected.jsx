@@ -1,13 +1,16 @@
 import { Navigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
-import UseAnimations from "react-useanimations";
-import infinity from "react-useanimations/lib/infinity";
 
 export default function Protected({ children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return <UseAnimations className="loading" animation={infinity} size={80} />;
+    return (
+      <main className="auth-loading" role="status" aria-live="polite">
+        <span className="auth-loading__spinner" aria-hidden="true" />
+        <p>Checking your session...</p>
+      </main>
+    );
   }
 
   if (!user) return <Navigate to="/login" />;

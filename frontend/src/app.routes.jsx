@@ -3,9 +3,25 @@ import Login from "./features/auth/pages/Login";
 import Register from "./features/auth/pages/Register";
 import Protected from "./features/auth/components/Protected";
 import Home from "./features/home/pages/Home";
+import UploadMusic from "./features/upload/page/UploadMusic";
 
 export const router = createBrowserRouter([
-  { path: "/", element: <Protected><Home /></Protected> },
+  {
+    path: "/",
+    element: (
+      <Protected>
+        <Home />
+      </Protected>
+    ),
+  },
+  {
+    path: "/upload",
+    element: (
+      <Protected>
+        <UploadMusic />
+      </Protected>
+    ),
+  },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
 ]);

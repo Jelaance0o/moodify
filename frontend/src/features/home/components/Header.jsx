@@ -1,4 +1,4 @@
-import { LogOut, Moon, Search, Sun } from "lucide-react";
+import { LogOut, Moon, Search, Sun, Upload } from "lucide-react";
 import { Link } from "react-router";
 import "../styles/Header.scss";
 
@@ -27,6 +27,11 @@ export default function Header({
           aria-label="Search songs and artists"
         />
       </label>
+
+      <Link className="upload-button" to="/upload" aria-label="Upload a song">
+        <Upload size={17} />
+        <span>Upload</span>
+      </Link>
 
       <button className="theme-toggle" onClick={onToggleTheme} aria-label="Toggle theme">
         {theme === "light" ? <Moon size={19} /> : <Sun size={19} />}

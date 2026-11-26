@@ -8,15 +8,14 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getMe().then(
-      (data) => setUser(data.user),
-      (error) => {
+    getMe()
+      .then((data) => setUser(data.user))
+      .catch((error) => {
         if (error.response?.status !== 401) {
           console.error("Unable to load the current user", error);
         }
-        setUser(null);
-      }
-    ).finally(() => setLoading(false));
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   return (

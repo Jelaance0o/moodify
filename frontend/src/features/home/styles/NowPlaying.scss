@@ -46,6 +46,7 @@
 .speed-control { border-radius: 7px; select { max-width: 48px; border: 0; background: transparent; color: inherit; outline: 0; } }
 .transport-controls { display: flex; align-items: center; gap: clamp(8px, 1.5vw, 20px);
   button { border: 0; background: transparent; color: var(--ink); display: grid; place-items: center; padding: 4px; svg { width: 19px; height: 19px; } }
+  button.shuffle-active { color: var(--accent); }
   .play-button { width: 48px; height: 48px; border-radius: 50%; background: var(--panel); color: var(--panel-ink); svg { width: 21px; height: 21px; } }
 }
 .volume-control { min-width: 0; display: flex; align-items: center; gap: 7px; color: var(--ink); input { width: clamp(55px, 7vw, 90px); min-width: 0; accent-color: var(--accent); } }

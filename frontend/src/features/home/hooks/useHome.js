@@ -14,6 +14,7 @@ export default function useHome(audioRef) {
   const [activeTab, setActiveTab] = useState("all");
   const [currentSongId, setCurrentSongId] = useState(null);
   const [queue, setQueue] = useState([]);
+  const [shuffleEnabled, setShuffleEnabled] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -32,12 +33,20 @@ export default function useHome(audioRef) {
   const audioContextRef = useRef(null);
   const audioSourceRef = useRef(null);
   const playAfterLoad = useRef(false);
+  const shuffleHistoryRef = useRef([]);
 
   const applySongs = useCallback((data) => {
     setSongs(data);
     setQueue(data.slice(0, 8).map((song) => song.id));
     setCurrentSongId(data[0]?.id || null);
     setApiStatus("connected");
+  }, []);
+
+  const setSongDuration = useCallback((songId, songDuration) => {
+    if (!Number.isFinite(songDuration) || songDuration <= 0) return;
+    setSongs((items) => items.map((song) => (
+      song.id === songId ? { ...song, duration: songDuration } : song
+    )));
   }, []);
 
   const reportSongError = useCallback((error) => {
@@ -63,11 +72,15 @@ export default function useHome(audioRef) {
   }, [requestSongs]);
 
   const currentSong = songs.find((song) => song.id === currentSongId) || songs[0];
+  const currentSongSrc = currentSong?.src;
   const filteredSongs = useMemo(() => {
     const text = search.toLowerCase();
-    return songs.filter((song) =>
-      `${song.title} ${song.artist} ${song.mood}`.toLowerCase().includes(text)
-    );
+    return songs
+      .filter((song) => `${song.title} ${song.artist} ${song.mood}`.toLowerCase().includes(text))
+      .sort((first, second) =>
+        first.title.localeCompare(second.title, undefined, { numeric: true, sensitivity: "base" }) ||
+        first.artist.localeCompare(second.artist, undefined, { numeric: true, sensitivity: "base" })
+      );
   }, [songs, search]);
 
   const startAudio = useCallback(() => {
@@ -109,6 +122,10 @@ export default function useHome(audioRef) {
   }, [audioRef]);
 
   function playSong(song) {
+    if (shuffleEnabled && !shuffleHistoryRef.current.includes(song.id)) {
+      shuffleHistoryRef.current = [...shuffleHistoryRef.current, song.id];
+    }
+
     if (song.id === currentSongId) {
       startAudio();
       return;
@@ -119,6 +136,31 @@ export default function useHome(audioRef) {
   }
 
   function playNext() {
+    if (shuffleEnabled) {
+      const candidates = songs.length > 1
+        ? songs.filter((song) => song.id !== currentSongId)
+        : songs;
+      if (!candidates.length) return;
+
+      const candidateIds = new Set(candidates.map((song) => song.id));
+      let played = shuffleHistoryRef.current.filter((id) => candidateIds.has(id));
+      let unplayed = candidates.filter((song) => !played.includes(song.id));
+
+      if (!unplayed.length) {
+        played = currentSongId ? [currentSongId] : [];
+        unplayed = candidates.filter((song) => !played.includes(song.id));
+      }
+      if (!unplayed.length) {
+        played = [];
+        unplayed = candidates;
+      }
+
+      const nextSong = unplayed[Math.floor(Math.random() * unplayed.length)];
+      shuffleHistoryRef.current = [...played, nextSong.id];
+      playSong(nextSong);
+      return;
+    }
+
     if (!queue.length) return;
     const index = queue.indexOf(currentSongId);
     const nextSong = songs.find((song) => song.id === queue[(index + 1) % queue.length]);
@@ -221,6 +263,12 @@ export default function useHome(audioRef) {
     setTheme((value) => value === "light" ? "dark" : "light");
   }
 
+  function toggleShuffle() {
+    const nextEnabled = !shuffleEnabled;
+    shuffleHistoryRef.current = nextEnabled && currentSongId ? [currentSongId] : [];
+    setShuffleEnabled(nextEnabled);
+  }
+
   function logoutUser() {
     setLogoutError("");
     handleLogout().then(
@@ -254,9 +302,9 @@ export default function useHome(audioRef) {
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!currentSong || !audio) return;
+    if (!currentSongSrc || !audio) return;
 
-    audio.src = currentSong.src;
+    audio.src = currentSongSrc;
     audio.load();
     setCurrentTime(0);
     setDuration(0);
@@ -265,7 +313,7 @@ export default function useHome(audioRef) {
       startAudio();
       playAfterLoad.current = false;
     }
-  }, [audioRef, currentSongId, currentSong, startAudio]);
+  }, [audioRef, currentSongId, currentSongSrc, startAudio]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -304,8 +352,10 @@ export default function useHome(audioRef) {
     activeTab,
     setActiveTab,
     currentSong,
+    setSongDuration,
     queue,
     setQueue,
+    shuffleEnabled,
     isPlaying,
     currentTime,
     duration,
@@ -328,6 +378,7 @@ export default function useHome(audioRef) {
     playSong,
     playNext,
     playPrevious,
+    toggleShuffle,
     handleMoodDetected,
     togglePlayback,
     seek,

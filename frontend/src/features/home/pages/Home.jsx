@@ -29,7 +29,6 @@ export default function Home() {
           <div className="dashboard__main">
             <div className="dashboard__top">
               <MoodDetection
-                apiStatus={home.apiStatus}
                 detectedMood={home.detectedMood}
                 moodCover={home.detectedMood && !home.moodMessage && home.currentSong?.mood === home.detectedMood.mood ? home.currentSong.cover : ""}
                 message={home.moodMessage}
@@ -58,12 +57,15 @@ export default function Home() {
               onVolumeChange={home.setVolume}
               onPlaybackRateChange={home.setPlaybackRate}
               onOpenHistory={home.openHistory}
+              shuffleEnabled={home.shuffleEnabled}
+              onToggleShuffle={home.toggleShuffle}
             />
           </div>
 
           <SongPanel
             songs={home.filteredSongs}
             allSongs={home.songs}
+            onSongDurationLoaded={home.setSongDuration}
             activeTab={home.activeTab}
             onTabChange={home.setActiveTab}
             currentSong={home.currentSong}

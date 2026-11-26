@@ -1,4 +1,4 @@
-import { Clock3, Gauge, History, Music2, Pause, Play, SkipBack, SkipForward, Volume2 } from "lucide-react";
+import { Clock3, Gauge, History, Music2, Pause, Play, Shuffle, SkipBack, SkipForward, Volume2 } from "lucide-react";
 import "../styles/NowPlaying.scss";
 
 const formatTime = (seconds = 0) => {
@@ -28,6 +28,8 @@ export default function NowPlaying({
   onVolumeChange,
   onPlaybackRateChange,
   onOpenHistory,
+  shuffleEnabled,
+  onToggleShuffle,
 }) {
   const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -124,6 +126,15 @@ export default function NowPlaying({
           </label>
 
           <div className="transport-controls">
+            <button
+              className={shuffleEnabled ? "shuffle-active" : ""}
+              onClick={onToggleShuffle}
+              aria-label={shuffleEnabled ? "Turn shuffle off" : "Turn shuffle on"}
+              aria-pressed={shuffleEnabled}
+              title={shuffleEnabled ? "Shuffle on" : "Shuffle off"}
+            >
+              <Shuffle />
+            </button>
             <button onClick={onPrevious} aria-label="Previous song"><SkipBack /></button>
             <button className="play-button" onClick={onPlayPause} aria-label={isPlaying ? "Pause" : "Play"}>
               {isPlaying ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}

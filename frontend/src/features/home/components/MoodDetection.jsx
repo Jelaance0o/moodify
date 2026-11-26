@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { Angry, ArrowRight, Camera, Frown, Smile, Sparkles } from "lucide-react";
+import { ArrowRight, Camera } from "lucide-react";
 import FaceExpression from "../../Expression/components/FaceExpression";
 import "../styles/MoodDetection.scss";
 
 const moodNames = { sad: "Sadness", happy: "Happiness", anger: "Anger", bliss: "Bliss" };
 const moods = [
-  { key: "happy", label: "Happy", emoji: "😊", Icon: Smile },
-  { key: "sad", label: "Sad", emoji: "😢", Icon: Frown },
-  { key: "anger", label: "Anger", emoji: "😠", Icon: Angry },
-  { key: "bliss", label: "Bliss", emoji: "🥰", Icon: Sparkles },
+  { key: "happy", label: "Happy", emoji: "😊", gesture: "Smile" },
+  { key: "sad", label: "Sad", emoji: "😢", gesture: "Frown / look down" },
+  { key: "anger", label: "Anger", emoji: "😠", gesture: "Lower brows" },
+  { key: "bliss", label: "Bliss", emoji: "🥰", gesture: "Smile + both open palms" },
 ];
 
-export default function MoodDetection({ apiStatus, detectedMood, message, onMoodDetected, moodCover }) {
+export default function MoodDetection({ detectedMood, message, onMoodDetected, moodCover }) {
   const [scanRequest, setScanRequest] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const label = detectedMood ? moodNames[detectedMood.mood] : null;
@@ -44,20 +44,14 @@ export default function MoodDetection({ apiStatus, detectedMood, message, onMood
           <h2>Detect Your Mood</h2>
           <span>01</span>
         </div>
-        <p>Your expression sets the tone. Smile with both palms open to unlock Bliss.</p>
+        <p>Use a natural facial cue. Add both open palms to your smile to detect Bliss.</p>
         <button
           className="detect-button"
-          disabled={isScanning || apiStatus !== "connected"}
+          disabled={isScanning}
           onClick={() => setScanRequest((request) => request + 1)}
         >
           <Camera size={21} />
-          <span>
-            {isScanning
-              ? "Detecting Mood..."
-              : apiStatus === "loading"
-                ? "Loading Songs..."
-                : apiStatus === "connected" ? "Detect Mood" : "Songs Unavailable"}
-          </span>
+          <span>{isScanning ? "Detecting Mood" : "Detect Mood"}</span>
           <ArrowRight size={20} />
         </button>
         <div className="mood-guide">
@@ -66,14 +60,14 @@ export default function MoodDetection({ apiStatus, detectedMood, message, onMood
             <span>4 moods · 1 soundtrack</span>
           </div>
           <div className="mood-guide__items">
-            {moods.map(({ key, label: moodLabel, emoji, Icon }) => (
+            {moods.map(({ key, label: moodLabel, emoji, gesture }) => (
               <div
                 className={`mood-guide__item mood-guide__item--${key}${detectedMood?.mood === key ? " is-active" : ""}`}
                 key={key}
               >
                 <span className="mood-guide__emoji" aria-hidden="true">{emoji}</span>
-                <Icon size={16} aria-hidden="true" />
-                <span>{moodLabel}</span>
+                <strong className="mood-guide__label">{moodLabel}</strong>
+                <small className="mood-guide__gesture">{gesture}</small>
               </div>
             ))}
           </div>

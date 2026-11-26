@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { MoreHorizontal, Music2, ListMusic, RefreshCw } from "lucide-react";
+import { ListPlus, Music2, ListMusic, RefreshCw } from "lucide-react";
 import "../styles/SongPanel.scss";
 
 const tabs = [
@@ -7,6 +7,15 @@ const tabs = [
   { id: "lyrics", label: "Lyrics", Icon: Music2 },
   { id: "upnext", label: "Up Next", Icon: ListMusic },
 ];
+
+function formatDuration(value) {
+  if (typeof value === "string" && /^\d+:\d{2}$/.test(value)) return value;
+
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds <= 0) return "--:--";
+
+  return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+}
 
 function SongCover({ song, className }) {
   return (
@@ -26,6 +35,7 @@ function SongCover({ song, className }) {
 export default function SongPanel({
   songs,
   allSongs,
+  onSongDurationLoaded,
   activeTab,
   onTabChange,
   currentSong,
@@ -48,6 +58,16 @@ export default function SongPanel({
 
   return (
     <aside className="song-panel">
+      {allSongs.filter((song) => song.src).map((song) => (
+        <audio
+          key={song.id}
+          hidden
+          preload="metadata"
+          src={song.src}
+          onLoadedMetadata={(event) => onSongDurationLoaded(song.id, event.currentTarget.duration)}
+        />
+      ))}
+
       <div className="song-panel__heading">
         <div>
           <h2>All Songs <span>({allSongs.length})</span></h2>
@@ -103,9 +123,14 @@ export default function SongPanel({
                   <small>{song.artist}{song.mood && song.mood !== "unknown" ? ` · ${song.mood}` : ""}</small>
                 </span>
               </button>
-              <span className="song-row__duration">{song.duration}</span>
-              <button className="song-row__more" onClick={() => addToQueue(song)} aria-label={`Add ${song.title} to queue`}>
-                <MoreHorizontal size={19} />
+              <span className="song-row__duration">{formatDuration(song.duration)}</span>
+              <button
+                className="song-row__queue"
+                onClick={() => addToQueue(song)}
+                aria-label={`Add ${song.title} to queue`}
+                title="Add to queue"
+              >
+                <ListPlus size={19} />
               </button>
             </div>
           ))}
@@ -147,7 +172,7 @@ export default function SongPanel({
                 <SongCover song={song} className="queue-row__cover" />
                 <span><strong>{song.title}</strong><small>{song.artist}</small></span>
               </button>
-              <span className="queue-row__duration">{song.duration}</span>
+              <span className="queue-row__duration">{formatDuration(song.duration)}</span>
             </div>
           ))}
           {!queuedSongs.length && <p className="panel-empty">Your queue is empty. Add songs from All.</p>}

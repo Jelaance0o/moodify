@@ -91,6 +91,23 @@
   &:hover { background: var(--surface-strong); }
 }
 
+.upload-button {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--surface) !important;
+  font-size: 12px;
+  text-decoration: none;
+
+  &:hover { background: var(--accent-hover); }
+}
+
 .profile {
   background: var(--surface-strong);
   font-size: 16px;
@@ -121,7 +138,7 @@
 @media (max-width: 700px) {
   .topbar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) repeat(3, auto);
+    grid-template-columns: minmax(0, 1fr) repeat(4, auto);
     gap: 8px;
     min-height: 0;
   }
@@ -132,4 +149,6 @@
   .theme-toggle, .profile { width: 36px; height: 36px; }
   .logout-button { width: 36px; min-height: 36px; padding: 0; }
   .logout-button span { display: none; }
+  .upload-button { width: 36px; min-height: 36px; padding: 0; }
+  .upload-button span { display: none; }
 }
