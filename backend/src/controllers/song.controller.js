@@ -4,38 +4,34 @@ const id3 = require("node-id3")
 const storageService = require("../services/storage.service")
 
 async function uploadSong(req, res) {
-    
-    // console.log("Lyrics:", lyrics);
-    // console.log("Title : ", tags.title)
-    // console.log("Artist : ", tags.artist)
-    // console.log("Year : ", tags.year)
 
     const songBuffer = req.file.buffer
     const { mood , lyrics } = req.body
 
     const tags = id3.read(songBuffer) 
 
-    const [songFile , posterFile ] = await Promise.all([
+const [songFile, posterFile] = await Promise.all([
+  storageService.uploadFile({
+    buffer: songBuffer,
+    filename: tags.title + ".mp3",
+    folder: "/cohort-2/moodify/songs",
+  }),
 
-        storageService.uploadFile({
-            buffer:songBuffer,
-            filename:tags.title + ".mp3",
-            folder: "/cohort-2/moodify/songs"
-        }),
-        storageService.uploadFile({
-            buffer:tags.image.imageBuffer,
-            filename:tags.title + ".jpeg",
-            folder: "/cohort-2/moodify/posters"
-        })
-
-    ])
+  tags.image?.imageBuffer
+    ? storageService.uploadFile({
+        buffer: tags.image.imageBuffer,
+        filename: tags.title + ".jpeg",
+        folder: "/cohort-2/moodify/posters",
+      })
+    : Promise.resolve(null),
+]);
 
     const song = await songModel.create({
       title: tags.title,
       artist: tags.artist,
       year: tags.year,
       url: songFile.url,
-      posterURL: posterFile.url,
+      posterURL: posterFile ? posterFile.url : "",
       lyrics,
       mood,
     });

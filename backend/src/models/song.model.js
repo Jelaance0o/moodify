@@ -4,7 +4,7 @@ const { type } = require("../config/cache");
 const songSchema = mongoose.Schema({
     title:{
         type:String,
-        required:true
+        // required:true
     },
     artist:{
         type:String,
@@ -21,7 +21,7 @@ const songSchema = mongoose.Schema({
     },
     posterURL:{
         type:String,
-        required:true
+        // required:true
     },
     mood:{
         type:String,
