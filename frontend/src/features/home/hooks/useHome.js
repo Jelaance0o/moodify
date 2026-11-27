@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../auth/hooks/useAuth";
+import useTheme from "../../shared/hooks/useTheme";
 import { getSongs } from "../services/songApi";
 
 export default function useHome(audioRef) {
   const navigate = useNavigate();
   const { user, handleLogout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [songs, setSongs] = useState([]);
   const [apiStatus, setApiStatus] = useState("loading");
   const [apiMessage, setApiMessage] = useState("");
-  const [theme, setTheme] = useState("light");
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [currentSongId, setCurrentSongId] = useState(null);
@@ -257,10 +258,6 @@ export default function useHome(audioRef) {
   function startSleepTimer() {
     setSleepRemaining(sleepMinutes * 60);
     setSleepMenuOpen(false);
-  }
-
-  function toggleTheme() {
-    setTheme((value) => value === "light" ? "dark" : "light");
   }
 
   function toggleShuffle() {

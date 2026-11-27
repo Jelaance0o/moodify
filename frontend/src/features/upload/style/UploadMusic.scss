@@ -23,6 +23,17 @@
       min-width: 0;
       gap: 22px;
 
+      &__link {
+        color: inherit !important;
+        text-decoration: none;
+
+        &:focus-visible {
+          outline: 2px solid #ed641f;
+          outline-offset: 4px;
+          border-radius: 2px;
+        }
+      }
+
       h2 {
         font-family: Georgia, serif;
         font-size: 30px;
@@ -633,103 +644,112 @@
 }
 
 .upload-page--dark {
-  background: #171513;
-  color: #f3efe9;
+  --page: #111110;
+  --surface: #1b1a18;
+  --surface-2: #24221f;
+  --ink: #f2eadf;
+  --muted: #aaa197;
+  --line: #49443e;
+  --accent: #df5734;
+  --accent-hover: #f06a45;
+  background: var(--page);
+  color: var(--ink);
 
   .upload-header {
-    .upload-brand p { color: #c6beb5; }
-    .brand-divider { background: #62594f; }
+    .upload-brand h2 span { color: var(--accent); }
+    .upload-brand p { color: var(--muted); }
+    .brand-divider { background: var(--line); }
 
     .header-actions {
       .back-button,
       .theme-toggle {
-        border-color: #62594f;
-        color: #f3efe9;
+        border-color: var(--line);
+        color: var(--ink);
 
         &:hover {
-          background: #f3efe9;
-          color: #171513;
+          background: var(--ink);
+          color: var(--page);
         }
       }
 
-      .profile-avatar { background: #3a342e; }
+      .profile-avatar { background: var(--surface-2); }
     }
   }
 
   .upload-card {
-    background: #221f1c;
-    border-color: #403a34;
+    background: var(--surface);
+    border-color: var(--line);
     box-shadow: 0 15px 35px rgba(0, 0, 0, .28);
 
     .upload-heading {
-      border-color: #403a34;
+      border-color: var(--line);
 
-      .heading-icon { background: #38291f; }
-      p { color: #bdb4aa; }
+      .heading-icon { background: color-mix(in srgb, var(--accent) 16%, var(--surface)); }
+      p { color: var(--muted); }
     }
 
     .upload-main {
       .file-upload .file-upload-label {
-        border-color: #bd6338;
-        background: #292420;
-        color: #f18a50;
+        border-color: var(--accent);
+        background: var(--surface-2);
+        color: var(--accent);
 
         &:hover {
-          border-color: #ed641f;
-          background: #33271f;
+          border-color: var(--accent-hover);
+          background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
         }
 
-        h3 { color: #f3efe9; }
-        p, small { color: #bdb4aa; }
+        h3 { color: var(--ink); }
+        p, small { color: var(--muted); }
 
         .choose-file,
         > span:not(:first-child) {
-          border-color: #bd6338;
-          color: #f19a68;
+          border-color: var(--accent);
+          color: var(--accent);
         }
       }
 
       .mood-selection {
-        border-color: #403a34;
+        border-color: var(--line);
 
         .mood-options .mood-option {
-          border-color: #49423b;
-          background: #292622;
-          color: #e8e1d8;
+          border-color: var(--line);
+          background: var(--surface-2);
+          color: var(--ink);
 
           &:hover,
           &.active {
-            border-color: #ed641f;
-            background: #38271e;
-            color: #ff9a61;
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 16%, var(--surface-2));
+            color: var(--accent);
           }
         }
       }
     }
 
     .lyrics-section {
-      label span { color: #bdb4aa; }
+      label span { color: var(--muted); }
 
       .lyrics-input {
-        border-color: #49423b;
-        background: #292622;
+        border-color: var(--line);
+        background: var(--surface-2);
 
-        &:focus-within { border-color: #ed641f; }
-        textarea { color: #f3efe9; }
-        textarea::placeholder { color: #a79d92; }
+        &:focus-within { border-color: var(--accent); }
+        textarea { color: var(--ink); }
+        textarea::placeholder { color: var(--muted); }
       }
 
-      .character-count { color: #bdb4aa; }
+      .character-count { color: var(--muted); }
     }
 
     .upload-error { color: #ff8a80; }
     .upload-success { color: #83d49b; }
 
     .upload-submit {
-      background: #f3efe9;
-      color: #171513;
+      background: var(--ink);
+      color: var(--page);
 
-      &:hover { background: #ed641f; color: white; }
+      &:hover { background: var(--accent); color: white; }
     }
   }
 }

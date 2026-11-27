@@ -252,7 +252,7 @@
   }
 }
 
-@media (max-width: 1120px) and (min-width: 701px) { .song-panel { height: 520px; } }
+@media (max-width: 900px) and (min-width: 701px) { .song-panel { height: 520px; } }
 
 @media (max-width: 700px) {
   .song-panel { height: min(78vh, 650px); height: min(78dvh, 650px); min-height: 0; padding: 15px 12px; }

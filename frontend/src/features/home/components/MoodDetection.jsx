@@ -73,12 +73,17 @@ export default function MoodDetection({ detectedMood, message, onMoodDetected, m
           </div>
           <span className="mood-guide__caption">We’ll find a song that fits how you feel.</span>
         </div>
-        <div className="mood-result">
-          {label ? (
-            <><strong>{label}</strong><span>{Math.round(detectedMood.confidence * 100)}% confidence</span></>
-          ) : <span>Your detected mood will appear here.</span>}
-          {message && <span className="mood-result__message">{message}</span>}
-        </div>
+        {(label || message) && (
+          <div className="mood-result">
+            {label && (
+              <>
+                <strong>{label}</strong>
+                <span>{Math.round(detectedMood.confidence * 100)}% confidence</span>
+              </>
+            )}
+            {message && <span className="mood-result__message">{message}</span>}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,8 +13,9 @@ import {
   Upload,
 } from "lucide-react";
 
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useUploadMusic from "../hooks/useUpload";
+import useTheme from "../../shared/hooks/useTheme";
 import "../style/UploadMusic.scss";
 
 const moods = [
@@ -27,7 +27,7 @@ const moods = [
 
 const UploadMusic = () => {
   const navigate = useNavigate();
-  const [isDark, setIsDark] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const {
     audioFile,
@@ -43,13 +43,15 @@ const UploadMusic = () => {
   } = useUploadMusic();
 
   return (
-    <main className={`upload-page${isDark ? " upload-page--dark" : ""}`}>
+    <main className={`upload-page${theme === "dark" ? " upload-page--dark" : ""}`}>
       {/* Header */}
       <header className="upload-header">
         <div className="upload-brand">
-          <h2>
-            Moodify<span>.</span>
-          </h2>
+          <Link className="upload-brand__link" to="/" aria-label="Moodify home">
+            <h2>
+              Moodify<span>.</span>
+            </h2>
+          </Link>
 
           <div className="brand-divider"></div>
 
@@ -69,12 +71,12 @@ const UploadMusic = () => {
           <button
             type="button"
             className="theme-toggle"
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            aria-pressed={isDark}
-            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            onClick={() => setIsDark((current) => !current)}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            aria-pressed={theme === "dark"}
+            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            onClick={toggleTheme}
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
           <div className="profile-avatar">U</div>

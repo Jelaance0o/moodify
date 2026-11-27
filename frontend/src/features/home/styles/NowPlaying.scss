@@ -88,6 +88,42 @@
   .transport-controls { gap: 18px; }
   .volume-control input { width: 66px; }
 }
+
+@media (max-height: 600px) and (min-width: 701px) and (max-width: 1120px) {
+  .now-playing {
+    grid-template-columns: minmax(110px, 160px) minmax(0, 1fr);
+    gap: 10px;
+    padding: 9px;
+  }
+
+  .now-playing__artwork { height: 100%; }
+  .now-playing__top { display: flex; flex-direction: column; gap: 4px; }
+  .now-playing__top h1 { margin: 3px 0 1px; font-size: 22px; }
+  .now-playing__utility { justify-content: flex-start; gap: 5px; padding-top: 2px; }
+  .utility-button { min-height: 28px; gap: 4px; padding: 0 7px; font-size: 10px; }
+  .track-progress { margin: 5px 0 3px; }
+  .player-controls { gap: 4px; }
+  .transport-controls { gap: 7px; }
+  .transport-controls button svg { width: 16px; height: 16px; }
+  .transport-controls .play-button { width: 38px; height: 38px; }
+  .speed-control { min-height: 28px; padding: 0 6px; }
+  .volume-control { gap: 4px; }
+  .volume-control input { width: 58px; }
+}
+
+@media (max-height: 700px) and (max-width: 700px) {
+  .now-playing { gap: 8px; padding: 8px; }
+  .now-playing__artwork { height: min(36vw, 125px); min-height: 100px; }
+  .now-playing__content { justify-content: flex-start; gap: 6px; }
+  .now-playing__top { gap: 3px; }
+  .now-playing__top h1 { margin: 2px 0; font-size: 21px; }
+  .now-playing__utility { padding-top: 0; }
+  .utility-button { min-height: 28px; }
+  .track-progress { margin: 4px 0 2px; }
+  .player-controls { gap: 7px; }
+  .transport-controls { gap: 14px; }
+  .transport-controls .play-button { width: 42px; height: 42px; }
+}
 .now-playing__metadata {
   display: flex;
   flex-wrap: wrap;

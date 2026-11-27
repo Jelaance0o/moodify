@@ -1,4 +1,5 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { ListMusic, Music2, ScanFace } from "lucide-react";
 import Header from "../components/Header";
 import MoodDetection from "../components/MoodDetection";
 import NowPlaying from "../components/NowPlaying";
@@ -10,6 +11,7 @@ import "../styles/Home.scss";
 
 export default function Home() {
   const audioRef = useRef(null);
+  const [mobileView, setMobileView] = useState("detect");
   const home = useHome(audioRef);
 
   return (
@@ -25,7 +27,37 @@ export default function Home() {
           logoutError={home.logoutError}
         />
 
-        <section className="dashboard">
+        <nav className="mobile-view-switcher" aria-label="Home sections">
+          <button
+            type="button"
+            className={mobileView === "detect" ? "is-active" : ""}
+            aria-pressed={mobileView === "detect"}
+            onClick={() => setMobileView("detect")}
+          >
+            <ScanFace size={18} />
+            <span>Detect</span>
+          </button>
+          <button
+            type="button"
+            className={mobileView === "player" ? "is-active" : ""}
+            aria-pressed={mobileView === "player"}
+            onClick={() => setMobileView("player")}
+          >
+            <Music2 size={18} />
+            <span>Player</span>
+          </button>
+          <button
+            type="button"
+            className={mobileView === "library" ? "is-active" : ""}
+            aria-pressed={mobileView === "library"}
+            onClick={() => setMobileView("library")}
+          >
+            <ListMusic size={18} />
+            <span>Library</span>
+          </button>
+        </nav>
+
+        <section className="dashboard" data-mobile-view={mobileView}>
           <div className="dashboard__main">
             <div className="dashboard__top">
               <MoodDetection

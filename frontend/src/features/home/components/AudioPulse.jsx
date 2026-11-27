@@ -31,7 +31,7 @@ export default function AudioPulse({ analyserRef, isPlaying }) {
         const frequency = hasAudio
           ? frequencies[Math.floor(index * frequencies.length / BAR_COUNT)] / 255
           : Math.abs(Math.sin(Date.now() / 180 + index * 0.38)) * 0.7;
-        bar.style.height = `${4 + frequency * 52}px`;
+        bar.style.height = `${4 + frequency * 22}px`;
       });
 
       frame = requestAnimationFrame(draw);
@@ -49,7 +49,7 @@ export default function AudioPulse({ analyserRef, isPlaying }) {
   }, [analyserRef, isPlaying]);
 
   return (
-    <div className="audio-pulse" aria-label="Live audio spectrum">
+    <div className="audio-pulse" aria-hidden="true">
       <div className="audio-pulse__bars">
         {Array.from({ length: BAR_COUNT }, (_, index) => (
           <i key={index} ref={(node) => { barsRef.current[index] = node; }} />
